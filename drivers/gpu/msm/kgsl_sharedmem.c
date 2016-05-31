@@ -700,17 +700,9 @@ _kgsl_sharedmem_page_alloc(struct kgsl_memdesc *memdesc,
 	memdesc->ops = &kgsl_page_alloc_ops;
 
 	/* Check for integer overflow */
-	if (sglen_alloc && (sizeof(struct page *) > INT_MAX / sglen_alloc))
+	if (sglen_alloc && (sizeof(struct scatterlist) > INT_MAX / sglen_alloc))
 		return -EINVAL;
-	/*
-	 * Allocate space to store the list of pages. This is an array of
-	 * pointers so we can track 1024 pages per page of allocation.
-	 * Keep this array around for non global non secure buffers that
-	 * are allocated by kgsl. This helps with improving the vm fault
-	 * routine by finding the faulted page in constant time.
-	 */
-
-	memdesc->pages = kgsl_malloc(sglen_alloc * sizeof(struct page *));
+	memdesc->sg = kgsl_malloc(sglen_alloc * sizeof(struct scatterlist));
 
 	if (memdesc->pages == NULL) {
 		ret = -ENOMEM;
